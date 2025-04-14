@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>哈哈魔法世界 - 部署工具</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #ff6b6b;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #4d96ff;
+            margin-top: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .deploy-option {
+            background-color: #f9f9f9;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #4d96ff;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4d96ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #3a7bd5;
+        }
+        .step {
+            margin-bottom: 10px;
+        }
+        .step-number {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            background-color: #4d96ff;
+            color: white;
+            text-align: center;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        code {
+            background-color: #f0f0f0;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: Consolas, monospace;
+        }
+        .status {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+            border-left: 4px solid #4caf50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>哈哈魔法世界 - 部署工具</h1>
+        
+        <div class="status">
+            <h3>本地服务器状态</h3>
+            <p id="serverStatus">检查中...</p>
+            <button class="button" onclick="checkLocalServer()">检查本地服务器</button>
+        </div>
+
+        <h2>部署选项</h2>
+        
+        <div class="deploy-option">
+            <h3>选项1: 使用Netlify部署 (推荐)</h3>
+            <div class="step"><span class="step-number">1</span> 访问 <a href="https://app.netlify.com/drop" target="_blank">Netlify Drop</a></div>
+            <div class="step"><span class="step-number">2</span> 将整个项目文件夹拖放到网页中的指定区域</div>
+            <div class="step"><span class="step-number">3</span> 等待上传和部署完成</div>
+            <div class="step"><span class="step-number">4</span> 部署完成后，您将获得一个随机域名，例如 https://your-site-name.netlify.app</div>
+            <a href="https://app.netlify.com/drop" target="_blank" class="button">打开Netlify Drop</a>
+        </div>
+        
+        <div class="deploy-option">
+            <h3>选项2: 使用Vercel部署</h3>
+            <div class="step"><span class="step-number">1</span> 访问 <a href="https://vercel.com/new" target="_blank">Vercel</a></div>
+            <div class="step"><span class="step-number">2</span> 导入您的项目</div>
+            <div class="step"><span class="step-number">3</span> 部署设置中，确保构建命令留空，输出目录设置为 <code>.</code></div>
+            <div class="step"><span class="step-number">4</span> 点击部署</div>
+            <a href="https://vercel.com/new" target="_blank" class="button">打开Vercel</a>
+        </div>
+        
+        <div class="deploy-option">
+            <h3>选项3: 导出为ZIP包</h3>
+            <div class="step"><span class="step-number">1</span> 将整个项目文件夹压缩为ZIP文件</div>
+            <div class="step"><span class="step-number">2</span> 下载ZIP文件</div>
+            <div class="step"><span class="step-number">3</span> 将ZIP文件上传到您自己的服务器</div>
+            <button class="button" onclick="prepareZipDownload()">准备ZIP下载</button>
+            <div id="zipStatus"></div>
+        </div>
+        
+        <h2>本地测试</h2>
+        <p>如果您已启动本地服务器，可以通过以下链接访问应用:</p>
+        <ul>
+            <li><a href="http://localhost:8000/" target="_blank">主页</a></li>
+            <li><a href="http://localhost:8000/kids-homepage.html" target="_blank">儿童主页</a></li>
+            <li><a href="http://localhost:8000/kids-drawing.html" target="_blank">绘画页面</a></li>
+            <li><a href="http://localhost:8000/knowledge-base.html" target="_blank">知识库</a></li>
+            <li><a href="http://localhost:8000/storybook-reader.html" target="_blank">故事阅读器</a></li>
+        </ul>
+        
+        <h2>故障排除</h2>
+        <p>如果您在部署过程中遇到问题:</p>
+        <ul>
+            <li>确保所有文件路径都是相对路径</li>
+            <li>检查所有文件的编码是否为UTF-8</li>
+            <li>如果您在中国大陆访问部署后的网站时遇到问题，可能需要考虑使用国内的托管服务</li>
+        </ul>
+    </div>
+
+    <script>
+        function checkLocalServer() {
+            const statusElement = document.getElementById('serverStatus');
+            statusElement.textContent = "正在检查本地服务器...";
+            
+            fetch('http://localhost:8000/', { mode: 'no-cors' })
+                .then(() => {
+                    statusElement.textContent = "✅ 本地服务器正在运行! 您可以点击上面的链接访问应用。";
+                    statusElement.style.color = 'green';
+                })
+                .catch(() => {
+                    statusElement.textContent = "❌ 无法连接到本地服务器。请确保您已运行服务器 (python -m http.server)";
+                    statusElement.style.color = 'red';
+                });
+        }
+        
+        function prepareZipDownload() {
+            const zipStatus = document.getElementById('zipStatus');
+            zipStatus.textContent = "此功能需要在服务器端实现。请手动将项目文件夹压缩为ZIP文件。";
+        }
+        
+        // 页面加载时自动检查服务器状态
+        window.onload = function() {
+            checkLocalServer();
+        };
+    </script>
+</body>
+</html> 

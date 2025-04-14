@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>神奇视频 - 创意魔法世界</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/responsive-base.css">
+    <style>
+        /* Basic styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "微软雅黑", Arial, sans-serif;
+            background-color: #F9F7FF;
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: var(--container-width);
+            margin: 0 auto;
+            padding: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Top navigation */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .home-btn {
+            width: var(--btn-size-md);
+            height: var(--btn-size-md);
+            background-color: #E3F2FD;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+            border: 3px solid #2196F3;
+            transition: all 0.3s;
+        }
+
+        .home-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .home-btn i {
+            font-size: var(--icon-size-md);
+            color: #2196F3;
+        }
+
+        .page-title {
+            font-size: var(--font-size-xl);
+            color: #2196F3;
+            font-weight: bold;
+            text-align: center;
+            flex-grow: 1;
+            margin-left: var(--spacing-md);
+        }
+
+        /* Main content area */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        /* Image/Video preview area */
+        .image-preview {
+            width: 90%;
+            max-width: 600px;
+            height: var(--preview-height);
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border: 5px dashed #90CAF9;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .empty-prompt {
+            text-align: center;
+            padding: var(--spacing-md);
+        }
+
+        .empty-prompt img {
+            width: clamp(100px, 30vw, 150px);
+            height: clamp(100px, 30vw, 150px);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .empty-prompt .prompt-text {
+            font-size: var(--font-size-lg);
+            color: #999;
+            font-weight: bold;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 100%;
+            display: none; /* Initially hidden, shown after upload */
+            object-fit: contain;
+        }
+
+        .preview-video {
+            max-width: 100%;
+            max-height: 100%;
+            display: none; /* Initially hidden, shown after generation */
+            object-fit: contain;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            background: rgba(255, 255, 255, 0.8);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: none; /* Only shown when image is displayed */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .remove-image i {
+            color: #FF5252;
+            font-size: 16px;
+        }
+
+        /* Control buttons */
+        .control-area {
+            display: flex;
+            justify-content: center;
+            gap: clamp(15px, 4vw, 40px);
+            flex-wrap: wrap;
+        }
+
+        .voice-btn, .video-btn, .refresh-btn, .upload-btn {
+            width: var(--btn-size-lg);
+            height: var(--btn-size-lg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 4px solid white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .voice-btn {
+            background: linear-gradient(145deg, #FF6B6B, #FF9D80);
+        }
+
+        .upload-btn {
+            background: linear-gradient(145deg, #FF9800, #FFC107);
+        }
+
+        .video-btn {
+            background: linear-gradient(145deg, #5CB8FF, #5F8FE6);
+            opacity: 0.6; /* Initially grayed out */
+            pointer-events: none; /* Initially not clickable */
+        }
+
+        .refresh-btn {
+            background: linear-gradient(145deg, #4CD964, #3CB371);
+            opacity: 0.6; /* Initially grayed out */
+            pointer-events: none; /* Initially not clickable */
+        }
+
+        .voice-btn:hover, .video-btn:hover, .refresh-btn:hover, .upload-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .voice-btn i, .video-btn i, .refresh-btn i, .upload-btn i {
+            font-size: var(--icon-size-lg);
+            color: white;
+        }
+
+        .video-btn.active, .refresh-btn.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* File input styling */
+        .file-input {
+            display: none;
+        }
+
+        /* Voice feedback overlay */
+        .feedback-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .feedback-modal {
+            background-color: white;
+            padding: clamp(20px, 5vw, 40px);
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            max-width: 90%;
+            width: fit-content;
+        }
+
+        .feedback-icon {
+            font-size: var(--icon-size-lg);
+            color: #2196F3;
+            margin-bottom: var(--spacing-md);
+            animation: pulse 1.5s infinite;
+        }
+
+        .feedback-text {
+            font-size: var(--font-size-lg);
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Loading animation */
+        .loading-animation {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .loading-spinner {
+            width: clamp(60px, 15vw, 80px);
+            height: clamp(60px, 15vw, 80px);
+            border-radius: 50%;
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #2196F3;
+            animation: spin 1s linear infinite;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .loading-text {
+            font-size: var(--font-size-lg);
+            color: #666;
+            font-weight: bold;
+        }
+
+        /* Cloud decorations */
+        .cloud {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .cloud1 {
+            width: 200px;
+            height: 60px;
+            top: 100px;
+            left: -100px;
+            animation: floatCloud 20s linear infinite;
+        }
+
+        .cloud2 {
+            width: 150px;
+            height: 45px;
+            top: 300px;
+            right: -50px;
+            animation: floatCloud 15s linear infinite;
+            animation-delay: 2s;
+        }
+
+        /* Prompt display */
+        .prompt-display {
+            background-color: #f0f0f0;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: 10px;
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-sm);
+            max-width: 90%;
+            text-align: center;
+            display: none;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes floatCloud {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(100vw + 200px));
+            }
+        }
+
+        @keyframes celebrate {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .upload-options {
+            display: flex;
+            justify-content: center;
+            gap: clamp(15px, 4vw, 30px);
+            margin-top: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+        
+        .upload-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.8);
+            padding: var(--spacing-md);
+            border-radius: 15px;
+            border: 2px solid #90CAF9;
+            min-width: 100px;
+        }
+        
+        .upload-option i {
+            font-size: var(--icon-size-lg);
+            color: #2196F3;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .upload-option span {
+            font-size: var(--font-size-sm);
+            color: #333;
+        }
+        
+        .upload-option:hover {
+            transform: scale(1.05);
+            background: rgba(224, 242, 255, 0.9);
+        }
+        
+        .camera-interface {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .camera-controls {
+            position: absolute;
+            bottom: var(--spacing-md);
+            display: flex;
+            justify-content: center;
+            gap: clamp(15px, 4vw, 30px);
+            width: 100%;
+        }
+        
+        .camera-button {
+            width: clamp(40px, 10vw, 60px);
+            height: clamp(40px, 10vw, 60px);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .camera-button:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        #captureBtn {
+            border: 3px solid white;
+        }
+        
+        #captureBtn i {
+            font-size: var(--icon-size-lg);
+            color: white;
+        }
+        
+        #cancelCameraBtn i {
+            font-size: var(--icon-size-sm);
+            color: white;
+        }
+
+        /* 超小屏幕的特殊处理 */
+        @media (max-width: var(--breakpoint-xs)) {
+            .image-preview {
+                height: 45vh;
+                min-height: 250px;
+            }
+            
+            .empty-prompt .prompt-text {
+                font-size: var(--font-size-md);
+            }
+            
+            .control-area {
+                gap: var(--spacing-sm);
+            }
+            
+            .upload-options {
+                gap: var(--spacing-sm);
+            }
+            
+            .upload-option {
+                padding: var(--spacing-sm);
+                min-width: 80px;
+            }
+        }
+
+        /* 深色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #232333;
+                color: #f0f0f0;
+            }
+            
+            .image-preview {
+                background-color: #2a2a3a;
+                border-color: #64B5F6;
+            }
+            
+            .empty-prompt .prompt-text {
+                color: #bbbbbb;
+            }
+            
+            .prompt-display {
+                background-color: #333344;
+                color: #f0f0f0;
+            }
+            
+            .feedback-modal {
+                background-color: #2a2a3a;
+            }
+            
+            .feedback-text {
+                color: #f0f0f0;
+            }
+            
+            .loading-animation {
+                background-color: rgba(40, 40, 50, 0.9);
+            }
+            
+            .loading-text {
+                color: #dddddd;
+            }
+            
+            .upload-option {
+                background: rgba(50, 50, 65, 0.8);
+                border-color: #5CB8FF;
+            }
+            
+            .upload-option span {
+                color: #f0f0f0;
+            }
+            
+            .upload-option:hover {
+                background: rgba(60, 60, 80, 0.9);
+            }
+            
+            .remove-image {
+                background: rgba(50, 50, 65, 0.8);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Decorative clouds -->
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    
+    <div class="container">
+        <!-- Top navigation -->
+        <div class="top-nav">
+            <a href="kids-homepage.html" class="home-btn" title="返回首页">
+                <i class="fas fa-home"></i>
+            </a>
+            <div class="page-title">神奇视频</div>
+            <div style="width: 70px;"></div><!-- Placeholder for centering -->
+        </div>
+        
+        <!-- Main content area -->
+        <div class="main-content">
+            <!-- Prompt display area -->
+            <div class="prompt-display" id="promptDisplay"></div>
+            
+            <!-- Video/Image preview area -->
+            <div class="image-preview" id="imagePreview">
+                <!-- Empty state or upload prompt -->
+                <div class="empty-prompt" id="emptyPrompt">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2659/2659360.png" alt="上传图片">
+                    <div class="prompt-text">选择上传方式</div>
+                    <div class="upload-options">
+                        <div class="upload-option" id="cameraBtn" title="拍照上传">
+                            <i class="fas fa-camera"></i>
+                            <span>拍照</span>
+                        </div>
+                        <div class="upload-option" id="uploadImageBtn" title="从相册上传">
+                            <i class="fas fa-image"></i>
+                            <span>相册</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Camera capture interface (initially hidden) -->
+                <div class="camera-interface" id="cameraInterface" style="display: none;">
+                    <video id="cameraFeed" autoplay playsinline style="max-width: 100%; max-height: 100%;"></video>
+                    <div class="camera-controls">
+                        <div class="camera-button" id="captureBtn">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="camera-button" id="cancelCameraBtn">
+                            <i class="fas fa-times"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image display -->
+                <img src="" class="preview-image" id="previewImage" alt="上传的图片">
+                
+                <!-- Video display -->
+                <video src="" class="preview-video" id="previewVideo" controls></video>
+                
+                <!-- Remove image button -->
+                <div class="remove-image" id="removeImageBtn" title="删除图片">
+                    <i class="fas fa-times"></i>
+                </div>
+
+                <!-- Loading animation -->
+                <div class="loading-animation" id="loadingAnimation">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text" id="loadingText">正在生成视频...</div>
+                </div>
+            </div>
+            
+            <!-- Control buttons -->
+            <div class="control-area">
+                <div class="voice-btn" id="voiceBtn" title="语音描述">
+                    <i class="fas fa-microphone"></i>
+                </div>
+                <div class="refresh-btn" id="refreshBtn" title="重新生成">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                <div class="video-btn" id="videoBtn" title="查看视频">
+                    <i class="fas fa-film"></i>
+                </div>
+            </div>
+            
+            <!-- Hidden file input -->
+            <input type="file" id="fileInput" class="file-input" accept="image/jpeg, image/png, image/jpg">
+        </div>
+    </div>
+
+    <!-- Voice feedback overlay -->
+    <div class="feedback-overlay" id="feedbackOverlay">
+        <div class="feedback-modal">
+            <i class="fas fa-volume-up feedback-icon" id="feedbackIcon"></i>
+            <div class="feedback-text" id="feedbackText">我在听...</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fixed API credentials (hidden from user)
+            const API_KEY = "8ddcb984021646e4af6cc3bf40d66ea8.toCAqKFrqKLmiP5U";
+            const API_BASE = "https://open.bigmodel.cn/api/paas/v4";
+            
+            // 初始化AIService（如果已加载）
+            if (typeof AIService !== 'undefined') {
+                AIService.init();
+            }
+            
+            // Optimal default settings
+            const defaultSettings = {
+                model: "cogvideox-2", // High quality model
+                quality: "quality", // Quality priority
+                size: "1920x1080", // Full HD
+                fps: 30,
+                withAudio: false
+            };
+            
+            // Get DOM elements
+            const voiceBtn = document.getElementById('voiceBtn');
+            const videoBtn = document.getElementById('videoBtn');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const fileInput = document.getElementById('fileInput');
+            const feedbackOverlay = document.getElementById('feedbackOverlay');
+            const feedbackIcon = document.getElementById('feedbackIcon');
+            const feedbackText = document.getElementById('feedbackText');
+            const imagePreview = document.getElementById('imagePreview');
+            const emptyPrompt = document.getElementById('emptyPrompt');
+            const previewImage = document.getElementById('previewImage');
+            const previewVideo = document.getElementById('previewVideo');
+            const removeImageBtn = document.getElementById('removeImageBtn');
+            const loadingAnimation = document.getElementById('loadingAnimation');
+            const loadingText = document.getElementById('loadingText');
+            const promptDisplay = document.getElementById('promptDisplay');
+            const uploadImageBtn = document.getElementById('uploadImageBtn');
+            const cameraBtn = document.getElementById('cameraBtn');
+            const cameraInterface = document.getElementById('cameraInterface');
+            const cameraFeed = document.getElementById('cameraFeed');
+            const captureBtn = document.getElementById('captureBtn');
+            const cancelCameraBtn = document.getElementById('cancelCameraBtn');
+            
+            // State variables
+            let currentImageBase64 = '';
+            let currentPrompt = '';
+            let videoGenerated = false;
+            let mediaStream = null;
+            let isListening = false;
+            
+            // Initialize SpeechRecognition (if available in browser)
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            let recognition;
+            
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.lang = 'zh-CN';
+                recognition.continuous = true;
+                recognition.interimResults = false;
+                
+                recognition.onstart = function() {
+                    showFeedback('我在听...', 'fa-volume-up');
+                    isListening = true;
+                    voiceBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+                    voiceBtn.title = '点击停止语音输入';
+                    voiceBtn.style.boxShadow = '0 0 15px #FF6B6B';
+                };
+                
+                recognition.onresult = function(event) {
+                    const lastResultIndex = event.results.length - 1;
+                    const transcript = event.results[lastResultIndex][0].transcript;
+                    showFeedback(`识别到: ${transcript}`, 'fa-check');
+                    
+                    // Store the prompt
+                    currentPrompt = transcript;
+                    
+                    // Display the prompt
+                    promptDisplay.textContent = `提示词: "${transcript}"`;
+                    promptDisplay.style.display = 'block';
+                    
+                    // 不自动关闭反馈，让用户可以继续说话或手动关闭
+                    // 添加可关闭的反馈提示
+                    feedbackText.innerHTML = `识别到: "${transcript}"<br><small style="font-size: 14px;">(继续说话或点击停止)</small>`;
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('语音识别错误:', event.error);
+                    showFeedback('识别失败，请重试', 'fa-exclamation-circle');
+                    
+                    setTimeout(() => {
+                        if (!isListening) {
+                            feedbackOverlay.style.display = 'none';
+                        }
+                    }, 2000);
+                };
+                
+                recognition.onend = function() {
+                    // 只有当用户手动停止时才重置UI
+                    if (!isListening) {
+                        voiceBtn.style.boxShadow = '';
+                        voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                        voiceBtn.title = '语音描述';
+                        feedbackOverlay.style.display = 'none';
+                        
+                        // 如果有图片和提示词，且不在生成中，自动开始生成视频
+                        if (currentImageBase64 && currentPrompt.trim().length > 0) {
+                            generateVideo(currentImageBase64, currentPrompt);
+                        } else if (!currentImageBase64) {
+                            showFeedback('请先上传图片', 'fa-exclamation-circle');
+                            setTimeout(() => {
+                                feedbackOverlay.style.display = 'none';
+                            }, 2000);
+                        }
+                    } else {
+                        // 如果仍应该在监听状态，则重新开始识别
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            // 已经在监听，忽略错误
+                            console.log('Recognition already started');
+                        }
+                    }
+                };
+            }
+            
+            // Handle file upload
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            // Display the image
+                            previewImage.src = event.target.result;
+                            previewImage.style.display = 'block';
+                            emptyPrompt.style.display = 'none';
+                            removeImageBtn.style.display = 'flex';
+                            
+                            // Store the base64 image (remove data:image prefix)
+                            const base64String = event.target.result;
+                            currentImageBase64 = base64String.substring(base64String.indexOf(',') + 1);
+                            
+                            // Hide any previous video
+                            previewVideo.style.display = 'none';
+                            
+                            // Reset video state
+                            videoGenerated = false;
+                            videoBtn.classList.remove('active');
+                            
+                            // Activate refresh button if we have a prompt
+                            if (currentPrompt) {
+                                refreshBtn.classList.add('active');
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            
+            // Upload image button click
+            if (uploadImageBtn) {
+                uploadImageBtn.addEventListener('click', function() {
+                    fileInput.click();
+                });
+            }
+            
+            // Camera button click
+            if (cameraBtn) {
+                cameraBtn.addEventListener('click', async function() {
+                    try {
+                        // Access device camera
+                        mediaStream = await navigator.mediaDevices.getUserMedia({
+                            video: { facingMode: 'environment' }
+                        });
+                        
+                        // Show camera interface
+                        cameraFeed.srcObject = mediaStream;
+                        emptyPrompt.style.display = 'none';
+                        cameraInterface.style.display = 'flex';
+                    } catch (err) {
+                        console.error('Camera access error:', err);
+                        showFeedback('无法访问摄像头', 'fa-exclamation-circle');
+                        setTimeout(() => {
+                            feedbackOverlay.style.display = 'none';
+                        }, 2000);
+                    }
+                });
+            }
+            
+            // Capture photo from camera
+            if (captureBtn) {
+                captureBtn.addEventListener('click', function() {
+                    // Create a canvas to capture the image
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = cameraFeed.videoWidth;
+                    canvas.height = cameraFeed.videoHeight;
+                    
+                    // Draw video frame to canvas
+                    context.drawImage(cameraFeed, 0, 0, canvas.width, canvas.height);
+                    
+                    // Get image data
+                    const imageDataUrl = canvas.toDataURL('image/jpeg');
+                    
+                    // Display the image
+                    previewImage.src = imageDataUrl;
+                    previewImage.style.display = 'block';
+                    cameraInterface.style.display = 'none';
+                    removeImageBtn.style.display = 'flex';
+                    
+                    // Store the base64 image (remove data:image prefix)
+                    currentImageBase64 = imageDataUrl.substring(imageDataUrl.indexOf(',') + 1);
+                    
+                    // Hide any previous video
+                    previewVideo.style.display = 'none';
+                    
+                    // Reset video state
+                    videoGenerated = false;
+                    videoBtn.classList.remove('active');
+                    
+                    // Activate refresh button if we have a prompt
+                    if (currentPrompt) {
+                        refreshBtn.classList.add('active');
+                    }
+                    
+                    // Stop camera stream
+                    stopCameraStream();
+                });
+            }
+            
+            // Cancel camera button click
+            if (cancelCameraBtn) {
+                cancelCameraBtn.addEventListener('click', function() {
+                    // Stop camera stream
+                    stopCameraStream();
+                    
+                    // Hide camera interface, show empty prompt
+                    cameraInterface.style.display = 'none';
+                    emptyPrompt.style.display = 'block';
+                });
+            }
+            
+            // Function to stop camera stream
+            function stopCameraStream() {
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                    mediaStream = null;
+                }
+            }
+            
+            // Voice button click
+            if (voiceBtn) {
+                voiceBtn.addEventListener('click', function() {
+                    if (recognition) {
+                        try {
+                            if (!isListening) {
+                                // 开始语音识别
+                                recognition.start();
+                            } else {
+                                // 停止语音识别
+                                isListening = false;
+                                recognition.stop();
+                            }
+                        } catch (e) {
+                            console.error('语音识别错误:', e);
+                            showFeedback('语音识别初始化失败', 'fa-exclamation-circle');
+                            
+                            setTimeout(() => {
+                                feedbackOverlay.style.display = 'none';
+                            }, 2000);
+                        }
+                    } else {
+                        showFeedback('您的浏览器不支持语音识别', 'fa-exclamation-circle');
+                        
+                        setTimeout(() => {
+                            feedbackOverlay.style.display = 'none';
+                        }, 2000);
+                    }
+                });
+            }
+            
+            // Remove image button click
+            if (removeImageBtn) {
+                removeImageBtn.addEventListener('click', function() {
+                    previewImage.src = '';
+                    previewImage.style.display = 'none';
+                    emptyPrompt.style.display = 'block';
+                    removeImageBtn.style.display = 'none';
+                    
+                    // Clear image data
+                    currentImageBase64 = '';
+                    
+                    // Reset buttons
+                    refreshBtn.classList.remove('active');
+                    videoBtn.classList.remove('active');
+                    
+                    // Hide video
+                    previewVideo.style.display = 'none';
+                    
+                    // Reset video state
+                    videoGenerated = false;
+                    
+                    // Make sure camera is stopped
+                    stopCameraStream();
+                });
+            }
+            
+            // Refresh button click
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', function() {
+                    if (this.classList.contains('active') && currentImageBase64 && currentPrompt) {
+                        generateVideo(currentImageBase64, currentPrompt);
+                    }
+                });
+            }
+            
+            // Video button click
+            if (videoBtn) {
+                videoBtn.addEventListener('click', function() {
+                    if (this.classList.contains('active') && videoGenerated) {
+                        // Show video, hide image
+                        previewImage.style.display = 'none';
+                        previewVideo.style.display = 'block';
+                    }
+                });
+            }
+            
+            // Generate video function
+            function generateVideo(imageBase64, prompt) {
+                // Show loading
+                loadingAnimation.style.display = 'flex';
+                loadingText.textContent = '正在生成视频...';
+                
+                // Prepare request data
+                const requestData = {
+                    model: defaultSettings.model,
+                    quality: defaultSettings.quality,
+                    with_audio: defaultSettings.withAudio,
+                    size: defaultSettings.size,
+                    fps: defaultSettings.fps,
+                    prompt: prompt,
+                    image_url: imageBase64
+                };
+                
+                // Send API request
+                fetch(`${API_BASE}/videos/generations`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error?.message || '请求失败');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Get task ID and start polling
+                    if (data.id) {
+                        checkVideoResult(data.id);
+                    } else {
+                        throw new Error('未返回任务ID');
+                    }
+                })
+                .catch(error => {
+                    console.error('视频生成请求失败:', error);
+                    loadingAnimation.style.display = 'none';
+                    
+                    showFeedback(`生成失败: ${error.message}`, 'fa-exclamation-circle');
+                    setTimeout(() => {
+                        feedbackOverlay.style.display = 'none';
+                    }, 3000);
+                });
+            }
+            
+            // Check video generation result
+            function checkVideoResult(taskId) {
+                const checkInterval = setInterval(() => {
+                    fetch(`${API_BASE}/async-result/${taskId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${API_KEY}`
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(data => {
+                                throw new Error(data.error?.message || '请求失败');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(result => {
+                        if (result.task_status === 'SUCCESS') {
+                            // Video generation successful
+                            clearInterval(checkInterval);
+                            
+                            // Hide loading
+                            loadingAnimation.style.display = 'none';
+                            
+                            // Process the result
+                            if (result.video_result && result.video_result.length > 0) {
+                                const videoUrl = result.video_result[0].url;
+                                
+                                // Set the video source
+                                previewVideo.src = videoUrl;
+                                
+                                // 立即显示视频，隐藏图片
+                                previewImage.style.display = 'none';
+                                previewVideo.style.display = 'block';
+                                
+                                // Update state
+                                videoGenerated = true;
+                                
+                                // 保存视频URL到localStorage，用于知识库自动保存
+                                localStorage.setItem('lastGeneratedVideo', videoUrl);
+                                // 保存视频提示词到localStorage，用于生成标题
+                                localStorage.setItem('lastVideoPrompt', currentPrompt);
+                                
+                                // 保存视频缩略图(当前使用的图片)到localStorage
+                                if (currentImageBase64) {
+                                    // 检查图片数据是否已包含data:前缀
+                                    if (currentImageBase64.startsWith('data:')) {
+                                        localStorage.setItem('lastVideoThumbnail', currentImageBase64);
+                                    } else {
+                                        localStorage.setItem('lastVideoThumbnail', 'data:image/jpeg;base64,' + currentImageBase64);
+                                    }
+                                } else if (previewImage.src) {
+                                    // 如果没有base64数据，但有图片显示，使用图片src
+                                    localStorage.setItem('lastVideoThumbnail', previewImage.src);
+                                }
+                                
+                                // Activate buttons
+                                videoBtn.classList.add('active');
+                                refreshBtn.classList.add('active');
+                                
+                                // Show feedback
+                                showFeedback('视频生成成功！', 'fa-check-circle');
+                                setTimeout(() => {
+                                    feedbackOverlay.style.display = 'none';
+                                }, 1500);
+                                
+                                // 直接保存到知识库 (新增代码)
+                                if (typeof AIService !== 'undefined' && AIService.knowledgeBase) {
+                                    try {
+                                        // 从主题词提取标题
+                                        let videoTitle = '自动保存的视频';
+                                        if (currentPrompt) {
+                                            // 使用提示词的前10个字作为标题
+                                            videoTitle = currentPrompt.substring(0, 10) + (currentPrompt.length > 10 ? '...' : '');
+                                        }
+                                        
+                                        // 准备缩略图
+                                        let thumbnailUrl = previewImage.src;
+                                        
+                                        // 使用AIService保存新视频
+                                        AIService.knowledgeBase.saveWork({
+                                            type: 'video',
+                                            content: videoUrl,
+                                            title: videoTitle,
+                                            date: new Date().toLocaleDateString('zh-CN'),
+                                            thumbnailUrl: thumbnailUrl
+                                        });
+                                        
+                                        console.log('视频已直接保存到知识库');
+                                    } catch (error) {
+                                        console.error('直接保存视频到知识库失败:', error);
+                                    }
+                                }
+                            } else {
+                                throw new Error('未找到视频结果');
+                            }
+                        } else if (result.task_status === 'FAIL') {
+                            // Video generation failed
+                            clearInterval(checkInterval);
+                            
+                            // Hide loading
+                            loadingAnimation.style.display = 'none';
+                            
+                            // Show error
+                            showFeedback('视频生成失败', 'fa-exclamation-circle');
+                            setTimeout(() => {
+                                feedbackOverlay.style.display = 'none';
+                            }, 3000);
+                        }
+                        // If PROCESSING, continue waiting
+                    })
+                    .catch(error => {
+                        console.error('检查视频结果失败:', error);
+                        
+                        // Don't clear interval, continue trying
+                        loadingText.textContent = '检查结果失败，重试中...';
+                    });
+                }, 5000); // Check every 5 seconds
+            }
+            
+            // Show feedback overlay
+            function showFeedback(message, iconClass) {
+                feedbackIcon.className = `fas ${iconClass} feedback-icon`;
+                feedbackText.innerHTML = message;
+                
+                // 添加关闭按钮到反馈框
+                if (!document.getElementById('closeFeedbackBtn')) {
+                    const closeBtn = document.createElement('div');
+                    closeBtn.id = 'closeFeedbackBtn';
+                    closeBtn.style.marginTop = '15px';
+                    closeBtn.style.padding = '8px 15px';
+                    closeBtn.style.backgroundColor = '#f0f0f0';
+                    closeBtn.style.borderRadius = '20px';
+                    closeBtn.style.cursor = 'pointer';
+                    closeBtn.style.display = 'inline-block';
+                    closeBtn.innerHTML = '完成输入';
+                    closeBtn.onclick = function() {
+                        if (isListening) {
+                            isListening = false;
+                            recognition.stop();
+                            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                            voiceBtn.title = '语音描述';
+                            voiceBtn.style.boxShadow = '';
+                        }
+                        feedbackOverlay.style.display = 'none';
+                        
+                        // 如果有图片和提示词，自动开始生成视频
+                        if (currentImageBase64 && currentPrompt.trim().length > 0) {
+                            generateVideo(currentImageBase64, currentPrompt);
+                        } else if (!currentImageBase64) {
+                            showFeedback('请先上传图片', 'fa-exclamation-circle');
+                            setTimeout(() => {
+                                feedbackOverlay.style.display = 'none';
+                            }, 2000);
+                        }
+                    };
+                    feedbackText.parentNode.appendChild(closeBtn);
+                }
+                
+                feedbackOverlay.style.display = 'flex';
+            }
+            
+            // 检查是否从画板页面跳转过来
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromDrawing = urlParams.get('fromDrawing');
+            
+            // 如果是从画板页面跳转过来，尝试加载图片
+            if (fromDrawing === 'true') {
+                const imageFromDrawing = localStorage.getItem('imageForVideo');
+                
+                if (imageFromDrawing) {
+                    // 显示图片
+                    previewImage.src = imageFromDrawing;
+                    previewImage.style.display = 'block';
+                    emptyPrompt.style.display = 'none';
+                    removeImageBtn.style.display = 'flex';
+                    
+                    // 获取base64图片数据（用于API调用）
+                    const base64String = imageFromDrawing;
+                    if (base64String.includes('base64,')) {
+                        currentImageBase64 = base64String.substring(base64String.indexOf('base64,') + 7);
+                    } else {
+                        currentImageBase64 = base64String;
+                    }
+                    
+                    // 提示用户如何生成视频
+                    showFeedback('点击麦克风按钮，描述图片的动作', 'fa-info-circle');
+                    setTimeout(() => {
+                        feedbackOverlay.style.display = 'none';
+                    }, 3000);
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

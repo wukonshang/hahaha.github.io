@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 创意魔法世界</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "微软雅黑", Arial, sans-serif;
+            background-color: #F9F7FF;
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* 顶部导航 */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .home-btn {
+            width: 70px;
+            height: 70px;
+            background-color: #F8F4FF;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(103, 58, 183, 0.3);
+            border: 3px solid #673AB7;
+            transition: all 0.3s;
+        }
+        
+        .home-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .home-btn i {
+            font-size: 35px;
+            color: #673AB7;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            color: #673AB7;
+            font-weight: bold;
+            text-align: center;
+            flex-grow: 1;
+            margin-left: 20px;
+        }
+        
+        /* 分类导航 */
+        .category-nav {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding: 10px;
+            border-radius: 20px;
+            background-color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 15px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .category-btn:hover {
+            background-color: #F8F4FF;
+        }
+        
+        .category-btn.active {
+            background-color: #F8F4FF;
+        }
+        
+        .category-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 15%;
+            width: 70%;
+            height: 3px;
+            background-color: #673AB7;
+            border-radius: 3px;
+        }
+        
+        .category-btn i {
+            font-size: 30px;
+            margin-bottom: 5px;
+        }
+        
+        .category-btn span {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .all-btn i {
+            color: #673AB7;
+        }
+        
+        .image-btn i {
+            color: #FF6B6B;
+        }
+        
+        .video-btn i {
+            color: #5CB8FF;
+        }
+        
+        .story-btn i {
+            color: #FFAA4D;
+        }
+        
+        /* 作品网格 */
+        .works-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            flex-grow: 1;
+        }
+        
+        .work-card {
+            background-color: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .work-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .work-thumbnail {
+            width: 100%;
+            height: 150px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .work-image {
+            border-top: 4px solid #FF6B6B;
+        }
+        
+        .work-video {
+            border-top: 4px solid #5CB8FF;
+        }
+        
+        .work-story {
+            border-top: 4px solid #FFAA4D;
+        }
+        
+        .work-type-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .work-image .work-type-icon i {
+            color: #FF6B6B;
+        }
+        
+        .work-video .work-type-icon i {
+            color: #5CB8FF;
+        }
+        
+        .work-story .work-type-icon i {
+            color: #FFAA4D;
+        }
+        
+        .work-info {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .work-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .work-date {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        /* 操作菜单 */
+        .work-menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .work-card:hover .work-menu {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .menu-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+        
+        .menu-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .view-btn {
+            background-color: #673AB7;
+        }
+        
+        .export-btn {
+            background-color: #4CAF50;
+        }
+        
+        .delete-btn {
+            background-color: #FF6B6B;
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex-grow: 1;
+            padding: 50px 0;
+        }
+        
+        .empty-icon {
+            font-size: 80px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .empty-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #888;
+            margin-bottom: 30px;
+        }
+        
+        .create-btn {
+            padding: 15px 30px;
+            background-color: #673AB7;
+            color: white;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(103, 58, 183, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .create-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(103, 58, 183, 0.4);
+        }
+        
+        /* 弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 90%;
+            max-height: 90%;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background-color: #f5f5f5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            background-color: #eee;
+        }
+        
+        .modal-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 10px;
+        }
+        
+        .modal-video {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 10px;
+        }
+        
+        /* 故事预览 */
+        .story-preview {
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .story-preview-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .story-preview-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFAA4D;
+            flex-grow: 1;
+        }
+        
+        .story-preview-content {
+            display: flex;
+            background-color: #FFF9F0;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .story-preview-image {
+            width: 200px;
+            height: 150px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+            margin-right: 20px;
+        }
+        
+        .story-preview-text {
+            flex-grow: 1;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        /* 确认删除弹窗 */
+        .confirm-dialog {
+            background-color: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .confirm-icon {
+            font-size: 60px;
+            color: #FF6B6B;
+            margin-bottom: 20px;
+        }
+        
+        .confirm-text {
+            font-size: 20px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .confirm-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .confirm-btn {
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .cancel-btn {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .delete-confirm-btn {
+            background-color: #FF6B6B;
+            color: white;
+        }
+        
+        .confirm-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .works-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 20px;
+            }
+            
+            .work-thumbnail {
+                height: 120px;
+            }
+            
+            .category-nav {
+                gap: 15px;
+            }
+            
+            .category-btn {
+                padding: 10px 15px;
+            }
+            
+            .category-btn i {
+                font-size: 25px;
+            }
+            
+            .category-btn span {
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .works-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .category-nav {
+                gap: 5px;
+            }
+            
+            .category-btn {
+                padding: 8px 10px;
+            }
+            
+            .category-btn i {
+                font-size: 22px;
+            }
+            
+            .category-btn span {
+                font-size: 12px;
+            }
+            
+            .story-preview-content {
+                flex-direction: column;
+            }
+            
+            .story-preview-image {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航 -->
+        <div class="top-nav">
+            <a href="kids-homepage.html" class="home-btn" title="返回首页">
+                <i class="fas fa-home"></i>
+            </a>
+            <div class="page-title">我的作品</div>
+            <div style="width: 70px;"></div><!-- 占位元素，保持标题居中 -->
+        </div>
+        
+        <!-- 分类导航 -->
+        <div class="category-nav">
+            <div class="category-btn all-btn active" data-category="all">
+                <i class="fas fa-star"></i>
+                <span>全部</span>
+            </div>
+            <div class="category-btn image-btn" data-category="image">
+                <i class="fas fa-paint-brush"></i>
+                <span>画画</span>
+            </div>
+            <div class="category-btn video-btn" data-category="video">
+                <i class="fas fa-film"></i>
+                <span>视频</span>
+            </div>
+            <div class="category-btn story-btn" data-category="story">
+                <i class="fas fa-book"></i>
+                <span>故事</span>
+            </div>
+            </div>
+            
+        <!-- 作品网格 -->
+        <div class="works-grid" id="worksGrid">
+            <!-- 作品卡片会由JavaScript动态生成 -->
+        </div>
+        
+        <!-- 空状态 -->
+        <div class="empty-state" id="emptyState">
+            <i class="fas fa-folder-open empty-icon"></i>
+            <div class="empty-text">还没有作品哦</div>
+            <a href="kids-homepage.html" class="create-btn">
+                <i class="fas fa-plus"></i> 创作新作品
+            </a>
+        </div>
+    </div>
+    
+    <!-- 预览弹窗 -->
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal-content">
+            <div class="modal-close" id="modalClose">
+                <i class="fas fa-times"></i>
+            </div>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+    
+    <!-- 确认删除弹窗 -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="confirm-dialog">
+            <i class="fas fa-trash-alt confirm-icon"></i>
+            <div class="confirm-text">确定要删除这个作品吗？</div>
+            <div class="confirm-buttons">
+                <div class="confirm-btn cancel-btn" id="cancelDelete">取消</div>
+                <div class="confirm-btn delete-confirm-btn" id="confirmDelete">删除</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 引入aiService.js -->
+    <script src="js/aiService.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const worksGrid = document.getElementById('worksGrid');
+            const emptyState = document.getElementById('emptyState');
+            const categoryBtns = document.querySelectorAll('.category-btn');
+            const previewModal = document.getElementById('previewModal');
+            const modalClose = document.getElementById('modalClose');
+            const modalContent = document.getElementById('modalContent');
+            const confirmModal = document.getElementById('confirmModal');
+            const cancelDelete = document.getElementById('cancelDelete');
+            const confirmDelete = document.getElementById('confirmDelete');
+            
+            // 格式化日期字符串，只保留年月日
+            function formatDateString(dateString) {
+                // 如果日期字符串包含空格（有时间部分），分割并只取第一部分
+                if (dateString.includes(' ')) {
+                    return dateString.split(' ')[0];
+                        }
+                // 否则原样返回（已经只有日期）
+                return dateString;
+            }
+            
+            // 从主题词中提取有意义的标题
+            function extractTitleFromTheme(theme) {
+                if (!theme) return '';
+                        
+                // 常见后缀列表
+                const suffixes = ['的图片', '的视频', '的照片', '的动画', '图片', '视频', '照片', '动画'];
+                
+                let title = theme.trim();
+                
+                // 如果存在后缀则移除
+                for (const suffix of suffixes) {
+                    if (title.endsWith(suffix)) {
+                        title = title.substring(0, title.length - suffix.length).trim();
+                        break; // 只移除一个后缀
+                    }
+                }
+                
+                // 如果处理后标题太短，使用原始主题词
+                if (title.length < 2) {
+                    title = theme;
+                }
+                
+                return title;
+            }
+            
+            // 渲染作品
+            function renderWorks(category = 'all') {
+                // 使用AIService获取作品
+                const works = category === 'all' 
+                    ? AIService.knowledgeBase.getAllWorks() 
+                    : AIService.knowledgeBase.getWorksByType(category);
+                
+                worksGrid.innerHTML = '';
+                
+                if (works.length === 0) {
+                    worksGrid.style.display = 'none';
+                    emptyState.style.display = 'flex';
+                } else {
+                    worksGrid.style.display = 'grid';
+                    emptyState.style.display = 'none';
+                    
+                    works.forEach(work => {
+                        const card = document.createElement('div');
+                        card.className = `work-card work-${work.type}`;
+                card.innerHTML = `
+                            <div class="work-thumbnail" style="background-image: url('${work.thumbnailUrl}');">
+                                <div class="work-type-icon">
+                                    <i class="fas fa-${work.type === 'image' ? 'paint-brush' : work.type === 'video' ? 'film' : 'book'}"></i>
+                                </div>
+                            </div>
+                            <div class="work-info">
+                                <div class="work-title">${work.title}</div>
+                                <div class="work-date">${formatDateString(work.date)}</div>
+                            </div>
+                            <div class="work-menu">
+                                <div class="menu-btn view-btn" data-action="view" data-id="${work.id}">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div class="menu-btn export-btn" data-action="export" data-id="${work.id}">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                                <div class="menu-btn delete-btn" data-action="delete" data-id="${work.id}">
+                                    <i class="fas fa-trash-alt"></i>
+                        </div>
+                    </div>
+                `;
+                
+                        worksGrid.appendChild(card);
+                    });
+                    
+                    // 添加操作按钮事件
+                    document.querySelectorAll('.menu-btn').forEach(btn => {
+                        btn.addEventListener('click', handleAction);
+                    });
+                }
+            }
+            
+            // 处理操作按钮点击
+            function handleAction(e) {
+                const action = e.currentTarget.dataset.action;
+                const workId = parseInt(e.currentTarget.dataset.id);
+                
+                switch (action) {
+                    case 'view':
+                        showPreview(workId);
+                        break;
+                    case 'export':
+                        exportWork(workId);
+                        break;
+                    case 'delete':
+                        showDeleteConfirm(workId);
+                        break;
+                }
+            }
+            
+            // 显示预览
+            function showPreview(workId) {
+                // 使用AIService获取作品详情
+                const work = AIService.knowledgeBase.getWorkById(workId);
+                
+                if (!work) {
+                    alert('找不到作品');
+                    return;
+                }
+                
+                modalContent.innerHTML = '';
+                
+                if (work.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = work.content;
+                    img.alt = work.title;
+                    img.className = 'modal-image';
+                    modalContent.appendChild(img);
+                } else if (work.type === 'video') {
+                    const video = document.createElement('video');
+                    video.src = work.content;
+                    video.controls = true;
+                    video.autoplay = true;
+                    video.className = 'modal-video';
+                    modalContent.appendChild(video);
+                } else if (work.type === 'story') {
+                    const storyPreview = document.createElement('div');
+                    storyPreview.className = 'story-preview';
+                
+                    // 创建标题部分
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = 'story-preview-header';
+                    headerDiv.innerHTML = `<div class="story-preview-title">${work.content.title}</div>`;
+                    storyPreview.appendChild(headerDiv);
+                    
+                    // 检查是否是新格式（有pages数组）还是旧格式
+                    const isNewFormat = Array.isArray(work.content.pages);
+                    
+                    if (isNewFormat) {
+                        // 创建故事内容部分
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'story-preview-content';
+                        storyPreview.appendChild(contentDiv);
+                        
+                        // 创建翻页控制
+                        const pageControlDiv = document.createElement('div');
+                        pageControlDiv.className = 'story-page-control';
+                        pageControlDiv.style.display = 'flex';
+                        pageControlDiv.style.justifyContent = 'center';
+                        pageControlDiv.style.alignItems = 'center';
+                        pageControlDiv.style.marginTop = '20px';
+                        pageControlDiv.style.gap = '20px';
+                        
+                        pageControlDiv.innerHTML = `
+                            <button class="prev-page-btn" style="padding: 8px 15px; border-radius: 20px; background-color: #673AB7; color: white; border: none; cursor: pointer;" disabled><i class="fas fa-chevron-left"></i> 上一页</button>
+                            <span class="page-indicator" style="font-size: 16px; font-weight: bold;">1 / ${work.content.pages.length}</span>
+                            <button class="next-page-btn" style="padding: 8px 15px; border-radius: 20px; background-color: #673AB7; color: white; border: none; cursor: pointer;">下一页 <i class="fas fa-chevron-right"></i></button>
+                        `;
+                        storyPreview.appendChild(pageControlDiv);
+                        
+                        // 设置当前页
+                        let currentPage = 0;
+                        
+                        // 显示当前页内容
+                        function showStoryPage(pageIndex) {
+                            const page = work.content.pages[pageIndex];
+                            contentDiv.innerHTML = `
+                                <div class="story-preview-image" style="background-image: url('${page.image}');"></div>
+                                <div class="story-preview-text">${page.text}</div>
+                            `;
+                            
+                            // 更新页码指示器
+                            const indicator = pageControlDiv.querySelector('.page-indicator');
+                            if (indicator) {
+                                indicator.textContent = `${pageIndex + 1} / ${work.content.pages.length}`;
+                            }
+                            
+                            // 更新按钮状态
+                            const prevBtn = pageControlDiv.querySelector('.prev-page-btn');
+                            const nextBtn = pageControlDiv.querySelector('.next-page-btn');
+                            if (prevBtn) prevBtn.disabled = pageIndex === 0;
+                            if (nextBtn) nextBtn.disabled = pageIndex === work.content.pages.length - 1;
+                        }
+                        
+                        // 初始显示第一页
+                        showStoryPage(currentPage);
+                        
+                        // 添加翻页事件
+                        const prevBtn = pageControlDiv.querySelector('.prev-page-btn');
+                        const nextBtn = pageControlDiv.querySelector('.next-page-btn');
+                        
+                        if (prevBtn) {
+                            prevBtn.addEventListener('click', () => {
+                                if (currentPage > 0) {
+                                    showStoryPage(--currentPage);
+                                }
+                            });
+                        }
+                        
+                        if (nextBtn) {
+                            nextBtn.addEventListener('click', () => {
+                                if (currentPage < work.content.pages.length - 1) {
+                                    showStoryPage(++currentPage);
+                                }
+                            });
+                        }
+                    } else {
+                        // 旧格式的显示方式
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'story-preview-content';
+                        contentDiv.innerHTML = `
+                            <div class="story-preview-image" style="background-image: url('${work.content.image}');"></div>
+                            <div class="story-preview-text">${work.content.text}</div>
+                        `;
+                        storyPreview.appendChild(contentDiv);
+                    }
+                    
+                    modalContent.appendChild(storyPreview);
+                }
+                
+                previewModal.style.display = 'flex';
+            }
+            
+            // 导出作品
+            function exportWork(workId) {
+                // 使用AIService导出作品
+                AIService.knowledgeBase.exportWork(workId)
+                    .then(result => {
+                        console.log(result.message);
+                    })
+                    .catch(error => {
+                        console.error('导出失败:', error);
+                        alert(`导出失败: ${error.message}`);
+                    });
+            }
+            
+            // 显示删除确认
+            function showDeleteConfirm(workId) {
+                confirmModal.style.display = 'flex';
+                confirmDelete.dataset.id = workId;
+            }
+            
+            // 删除作品
+            function deleteWork(workId) {
+                // 使用AIService删除作品
+                const success = AIService.knowledgeBase.deleteWork(workId);
+                
+                if (success) {
+                    renderWorks(getCurrentCategory());
+                } else {
+                    alert('删除失败，请重试');
+                }
+            }
+            
+            // 获取当前选中的分类
+            function getCurrentCategory() {
+                const activeBtn = document.querySelector('.category-btn.active');
+                return activeBtn.dataset.category;
+            }
+            
+            // 分类按钮点击事件
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    renderWorks(this.dataset.category);
+                    });
+                });
+                
+            // 关闭模态框
+            modalClose.addEventListener('click', function() {
+                previewModal.style.display = 'none';
+                const videos = modalContent.querySelectorAll('video');
+                videos.forEach(video => video.pause());
+            });
+            
+            // 点击模态框背景关闭
+            previewModal.addEventListener('click', function(e) {
+                if (e.target === previewModal) {
+                    previewModal.style.display = 'none';
+                    const videos = modalContent.querySelectorAll('video');
+                    videos.forEach(video => video.pause());
+                }
+            });
+            
+            // 取消删除
+            cancelDelete.addEventListener('click', function() {
+                confirmModal.style.display = 'none';
+                });
+                
+            // 确认删除
+            confirmDelete.addEventListener('click', function() {
+                const workId = parseInt(this.dataset.id);
+                deleteWork(workId);
+                confirmModal.style.display = 'none';
+            });
+            
+            // 点击确认模态框背景取消
+            confirmModal.addEventListener('click', function(e) {
+                if (e.target === confirmModal) {
+                    confirmModal.style.display = 'none';
+                }
+            });
+            
+            // 检查并从其他页面获取新作品
+            function checkForNewWorks() {
+                // 检查画画页面的作品
+                const lastGeneratedImage = localStorage.getItem('lastGeneratedImage');
+                const lastImagePrompt = localStorage.getItem('lastImagePrompt');
+                if (lastGeneratedImage) {
+                    // 尝试保存为新作品
+                    try {
+                        // 检查是否已经保存过
+                        const works = AIService.knowledgeBase.getAllWorks();
+                        const exists = works.some(work => work.content === lastGeneratedImage);
+                        
+                        if (!exists) {
+                            // 从主题词提取标题
+                            let imageTitle = '自动保存的画作';
+                            if (lastImagePrompt) {
+                                imageTitle = extractTitleFromTheme(lastImagePrompt);
+                            }
+                            
+                            // 使用AIService保存新图像
+                            AIService.aiIntegration.saveGeneratedImage(
+                                lastGeneratedImage, 
+                                imageTitle, 
+                                '我的画作'
+                            );
+                        }
+                    } catch (error) {
+                        console.error('保存新作品失败:', error);
+                    }
+            }
+            
+                // 检查视频页面的作品
+                const lastGeneratedVideo = localStorage.getItem('lastGeneratedVideo');
+                const lastVideoPrompt = localStorage.getItem('lastVideoPrompt') || localStorage.getItem('lastImagePrompt') || localStorage.getItem('currentPrompt');
+                if (lastGeneratedVideo) {
+                    // 尝试保存为新作品
+                    try {
+                        // 检查是否已经保存过
+                        const works = AIService.knowledgeBase.getAllWorks();
+                        const exists = works.some(work => work.content === lastGeneratedVideo);
+                        
+                        if (!exists) {
+                            // 从主题词提取标题
+                            let videoTitle = '自动保存的视频';
+                            if (lastVideoPrompt) {
+                                videoTitle = extractTitleFromTheme(lastVideoPrompt);
+                            }
+                            
+                            // 获取视频缩略图
+                            const videoThumbnail = localStorage.getItem('lastVideoThumbnail');
+                            
+                            // 使用AIService保存新视频
+                            AIService.knowledgeBase.saveWork({
+                                type: 'video',
+                                content: lastGeneratedVideo,
+                                title: videoTitle,
+                                date: new Date().toLocaleDateString('zh-CN'),
+                                thumbnailUrl: videoThumbnail || lastGeneratedImage || 'https://cdn-icons-png.flaticon.com/512/2659/2659360.png'
+                            });
+                    }
+                    } catch (error) {
+                        console.error('保存新视频失败:', error);
+                    }
+                }
+                
+                // 检查故事页面的作品
+                const lastGeneratedStoryString = localStorage.getItem('lastGeneratedStory');
+                if (lastGeneratedStoryString) {
+                    try {
+                        // 解析故事数据
+                        const lastGeneratedStory = JSON.parse(lastGeneratedStoryString);
+                        
+                        // 检查是否已经保存过（基于标题和首页内容进行比较）
+                        const works = AIService.knowledgeBase.getAllWorks();
+                        const storyExists = works.some(work => {
+                            return work.type === 'story' && 
+                                  work.content && 
+                                  work.content.title === lastGeneratedStory.title &&
+                                  work.content.text.includes(lastGeneratedStory.pages[0].text);
+                        });
+                        
+                        if (!storyExists) {
+                            // 提取首页图片作为故事封面
+                            const thumbnailUrl = lastGeneratedStory.pages[0].imageUrl;
+                            
+                            // 格式化故事内容以便保存
+                            const storyContent = {
+                                title: lastGeneratedStory.title,
+                                pages: lastGeneratedStory.pages.map(page => ({
+                                    text: page.text,
+                                    image: page.imageUrl
+                                }))
+                            };
+                            
+                            // 使用AIService保存新故事
+                            AIService.knowledgeBase.saveWork({
+                                type: 'story',
+                                content: storyContent,
+                                title: lastGeneratedStory.title,
+                                date: new Date().toLocaleDateString('zh-CN'),
+                                thumbnailUrl: thumbnailUrl
+                            });
+                        }
+                    } catch (error) {
+                        console.error('保存新故事失败:', error);
+                    }
+                }
+                
+                // 渲染作品
+                renderWorks('all');
+            }
+            
+            // 初始化页面
+            function initPage() {
+                // 确保AIService已初始化
+                if (typeof AIService !== 'undefined') {
+                    AIService.init();
+                    checkForNewWorks();
+                } else {
+                    console.error('AIService未定义，请检查是否正确加载');
+                    // 使用默认渲染方式
+                renderWorks('all');
+                }
+            }
+            
+            // 初始化页面
+            initPage();
+        });
+    </script>
+</body>
+</html> 

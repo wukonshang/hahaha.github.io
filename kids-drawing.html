@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>画画 - 创意魔法世界</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/responsive-base.css">
+    <style>
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "微软雅黑", Arial, sans-serif;
+            background-color: #F9F7FF;
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: var(--container-width);
+            margin: 0 auto;
+            padding: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* 顶部导航 */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .home-btn {
+            width: var(--btn-size-md);
+            height: var(--btn-size-md);
+            background-color: #FFE8E8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+            border: 3px solid #FF6B6B;
+            transition: all 0.3s;
+        }
+        
+        .home-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .home-btn i {
+            font-size: var(--icon-size-md);
+            color: #FF6B6B;
+        }
+        
+        .page-title {
+            font-size: var(--font-size-xl);
+            color: #FF6B6B;
+            font-weight: bold;
+            text-align: center;
+            flex-grow: 1;
+            margin-left: var(--spacing-md);
+        }
+        
+        /* 主要内容区 */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        /* 图片预览区 */
+        .image-preview {
+            width: 90%;
+            max-width: 600px;
+            height: var(--preview-height);
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border: 5px dashed #FFD080;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .empty-prompt {
+            text-align: center;
+            padding: var(--spacing-lg);
+        }
+        
+        .empty-prompt img {
+            width: clamp(100px, 30vw, 150px);
+            height: clamp(100px, 30vw, 150px);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .empty-prompt .prompt-text {
+            font-size: var(--font-size-lg);
+            color: #999;
+            font-weight: bold;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 100%;
+            display: none; /* 初始隐藏，生成后显示 */
+            object-fit: contain;
+        }
+        
+        /* 操作按钮区 */
+        .control-area {
+            display: flex;
+            justify-content: center;
+            gap: clamp(20px, 5vw, 40px);
+            flex-wrap: wrap;
+        }
+        
+        .voice-btn, .video-btn, .refresh-btn {
+            width: var(--btn-size-lg);
+            height: var(--btn-size-lg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 4px solid white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .voice-btn {
+            background: linear-gradient(145deg, #FF6B6B, #FF9D80);
+        }
+        
+        .video-btn {
+            background: linear-gradient(145deg, #5CB8FF, #5F8FE6);
+            opacity: 0.6; /* 初始状态下置灰 */
+            pointer-events: none; /* 初始状态下不可点击 */
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(145deg, #4CD964, #3CB371);
+            opacity: 0.6; /* 初始状态下置灰 */
+            pointer-events: none; /* 初始状态下不可点击 */
+        }
+        
+        .voice-btn:hover, .video-btn:hover, .refresh-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .voice-btn i, .video-btn i, .refresh-btn i {
+            font-size: var(--icon-size-lg);
+            color: white;
+        }
+        
+        .video-btn.active, .refresh-btn.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* 语音反馈区 */
+        .feedback-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .feedback-modal {
+            background-color: white;
+            padding: clamp(20px, 5vw, 40px);
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            max-width: 90%;
+            width: fit-content;
+        }
+        
+        .feedback-icon {
+            font-size: var(--icon-size-lg);
+            color: #FF6B6B;
+            margin-bottom: var(--spacing-md);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .feedback-text {
+            font-size: var(--font-size-lg);
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* 加载动画 */
+        .loading-animation {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .loading-spinner {
+            width: clamp(60px, 15vw, 80px);
+            height: clamp(60px, 15vw, 80px);
+            border-radius: 50%;
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #FF6B6B;
+            animation: spin 1s linear infinite;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .loading-text {
+            font-size: var(--font-size-lg);
+            color: #666;
+            font-weight: bold;
+        }
+        
+        /* 云朵装饰 */
+        .cloud {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            z-index: -1;
+        }
+        
+        .cloud1 {
+            width: 200px;
+            height: 60px;
+            top: 100px;
+            left: -100px;
+            animation: floatCloud 20s linear infinite;
+        }
+        
+        .cloud2 {
+            width: 150px;
+            height: 45px;
+            top: 300px;
+            right: -50px;
+            animation: floatCloud 15s linear infinite;
+            animation-delay: 2s;
+        }
+        
+        /* 动画效果 */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes floatCloud {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(100vw + 200px));
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes celebrate {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* 提示词显示区域 */
+        .prompt-display {
+            background-color: #f0f0f0;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: 10px;
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-sm);
+            max-width: 90%;
+            text-align: center;
+            display: none;
+        }
+        
+        /* 响应式设计 - 使用CSS变量 */
+        @media (max-width: var(--breakpoint-xs)) {
+            .control-area {
+                gap: var(--spacing-sm);
+            }
+            
+            .feedback-modal {
+                padding: var(--spacing-md);
+            }
+            
+            .image-preview {
+                height: 45vh;
+                min-height: 250px;
+            }
+            
+            .empty-prompt .prompt-text {
+                font-size: var(--font-size-md);
+            }
+        }
+        
+        /* 深色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #232333;
+                color: #f0f0f0;
+            }
+            
+            .image-preview {
+                background-color: #2a2a3a;
+                border-color: #FFB74D;
+            }
+            
+            .empty-prompt .prompt-text {
+                color: #bbbbbb;
+            }
+            
+            .prompt-display {
+                background-color: #333344;
+                color: #f0f0f0;
+            }
+            
+            .feedback-modal {
+                background-color: #2a2a3a;
+            }
+            
+            .feedback-text {
+                color: #f0f0f0;
+            }
+            
+            .loading-animation {
+                background-color: rgba(40, 40, 50, 0.9);
+            }
+            
+            .loading-text {
+                color: #dddddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 装饰性云朵 -->
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    
+    <div class="container">
+        <!-- 顶部导航 -->
+        <div class="top-nav">
+            <a href="kids-homepage.html" class="home-btn" title="返回首页">
+                <i class="fas fa-home"></i>
+            </a>
+            <div class="page-title">神奇画板</div>
+            <div style="width: 70px;"></div><!-- 占位元素，保持标题居中 -->
+        </div>
+        
+        <!-- 主要内容区 -->
+        <div class="main-content">
+            <!-- 显示提示词区域 -->
+            <div class="prompt-display" id="promptDisplay"></div>
+            
+            <!-- 图片预览区 -->
+            <div class="image-preview" id="imagePreview">
+                <div class="empty-prompt" id="emptyPrompt">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3163/3163478.png" alt="绘画提示">
+                    <div class="prompt-text">点击下方麦克风，说出你想画的内容</div>
+                </div>
+                <img src="" class="preview-image" id="previewImage" alt="生成的图片">
+                
+                <!-- 加载动画 -->
+                <div class="loading-animation" id="loadingAnimation">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">正在绘画中...</div>
+                </div>
+            </div>
+            
+            <!-- 操作按钮区 -->
+            <div class="control-area">
+                <div class="voice-btn" id="voiceBtn" title="点击说话">
+                    <i class="fas fa-microphone"></i>
+                </div>
+                <div class="refresh-btn" id="refreshBtn" title="重新绘画">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                <div class="video-btn" id="videoBtn" title="生成视频">
+                    <i class="fas fa-film"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 语音反馈叠加层 -->
+    <div class="feedback-overlay" id="feedbackOverlay">
+        <div class="feedback-modal">
+            <i class="fas fa-volume-up feedback-icon" id="feedbackIcon"></i>
+            <div class="feedback-text" id="feedbackText">我在听...</div>
+        </div>
+    </div>
+    
+    <!-- 引入语音和图像服务 -->
+    <script src="js/speechService.js"></script>
+    <script src="js/imageService.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const voiceBtn = document.getElementById('voiceBtn');
+            const videoBtn = document.getElementById('videoBtn');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const feedbackOverlay = document.getElementById('feedbackOverlay');
+            const feedbackIcon = document.getElementById('feedbackIcon');
+            const feedbackText = document.getElementById('feedbackText');
+            const imagePreview = document.getElementById('imagePreview');
+            const emptyPrompt = document.getElementById('emptyPrompt');
+            const previewImage = document.getElementById('previewImage');
+            const loadingAnimation = document.getElementById('loadingAnimation');
+            const promptDisplay = document.getElementById('promptDisplay');
+            
+            // 存储当前生成的图片URL和提示词
+            let generatedImageUrl = '';
+            let currentPrompt = '';
+            
+            // 初始化语音识别服务
+            if (!SpeechService.init()) {
+                showFeedback('语音识别初始化失败', 'fa-exclamation-circle');
+                setTimeout(() => {
+                    feedbackOverlay.style.display = 'none';
+                }, 3000);
+            }
+            
+            // 设置语音识别回调
+            SpeechService.onStart(() => {
+                showFeedback('我在听...', 'fa-volume-up');
+                voiceBtn.classList.add('active');
+            });
+            
+            SpeechService.onResult((text) => {
+                // 显示识别结果
+                showFeedback(`识别到: ${text}`, 'fa-check');
+                
+                // 存储提示词
+                currentPrompt = text;
+                
+                // 延迟一会儿后开始生成图像
+                setTimeout(() => {
+                    feedbackOverlay.style.display = 'none';
+                    startImageGeneration(text);
+                }, 1000);
+            });
+            
+            SpeechService.onEnd(() => {
+                voiceBtn.classList.remove('active');
+            });
+            
+            SpeechService.onError((error) => {
+                console.error('语音识别错误:', error);
+                showFeedback('识别失败，请重试', 'fa-exclamation-circle');
+                
+                setTimeout(() => {
+                    feedbackOverlay.style.display = 'none';
+                }, 2000);
+            });
+            
+            // 设置图像生成服务回调
+            ImageService.onStart(() => {
+                loadingAnimation.style.display = 'flex';
+            });
+            
+            ImageService.onSuccess((imageUrl) => {
+                // 隐藏加载动画
+                loadingAnimation.style.display = 'none';
+                
+                // 显示生成的图片
+                generatedImageUrl = imageUrl;
+                previewImage.src = imageUrl;
+                previewImage.style.display = 'block';
+                emptyPrompt.style.display = 'none';
+                
+                // 添加图片加载动画
+                previewImage.style.animation = 'celebrate 0.5s ease-out';
+                
+                // 激活视频和刷新按钮
+                videoBtn.classList.add('active');
+                refreshBtn.classList.add('active');
+                
+                // 存储图片URL（用于后续视频生成）
+                localStorage.setItem('lastGeneratedImage', imageUrl);
+                localStorage.setItem('lastImagePrompt', currentPrompt);
+                
+                // 显示使用的提示词
+                promptDisplay.textContent = `提示词: "${currentPrompt}"`;
+                promptDisplay.style.display = 'block';
+            });
+            
+            ImageService.onError((error) => {
+                console.error('图像生成错误:', error);
+                loadingAnimation.style.display = 'none';
+                showFeedback('图像生成失败，请重试', 'fa-exclamation-circle');
+                
+                setTimeout(() => {
+                    feedbackOverlay.style.display = 'none';
+                }, 3000);
+            });
+            
+            // 语音按钮点击事件
+            voiceBtn.addEventListener('click', function() {
+                SpeechService.start();
+            });
+            
+            // 开始图片生成过程
+            function startImageGeneration(prompt) {
+                // 优化提示词
+                const optimizedPrompt = ImageService.optimizePromptForChildren(prompt);
+                
+                // 调用图像生成API
+                ImageService.generateImage(optimizedPrompt)
+                    .catch(error => {
+                        console.error('图像生成失败:', error);
+                        showFeedback('图像生成失败，请重试', 'fa-exclamation-circle');
+                        
+                        setTimeout(() => {
+                            feedbackOverlay.style.display = 'none';
+                        }, 3000);
+                    });
+            }
+            
+            // 显示反馈
+            function showFeedback(message, iconClass) {
+                feedbackIcon.className = `fas ${iconClass} feedback-icon`;
+                feedbackText.textContent = message;
+                feedbackOverlay.style.display = 'flex';
+            }
+            
+            // 刷新按钮点击事件
+            refreshBtn.addEventListener('click', function() {
+                if (this.classList.contains('active') && currentPrompt) {
+                    startImageGeneration(currentPrompt);
+                }
+            });
+            
+            // 视频按钮点击事件
+            videoBtn.addEventListener('click', function() {
+                if (this.classList.contains('active')) {
+                    // 存储当前生成的图片URL和提示词（用于视频页面）
+                    localStorage.setItem('imageForVideo', generatedImageUrl);
+                    localStorage.setItem('promptForVideo', currentPrompt);
+                    
+                    // 跳转到视频页面
+                    window.location.href = 'cogvideo-test.html?fromDrawing=true';
+                }
+            });
+            
+            // 检查是否已有生成的图片（页面刷新后恢复状态）
+            const savedImage = localStorage.getItem('lastGeneratedImage');
+            const savedPrompt = localStorage.getItem('lastImagePrompt');
+            
+            if (savedImage) {
+                previewImage.src = savedImage;
+                previewImage.style.display = 'block';
+                emptyPrompt.style.display = 'none';
+                videoBtn.classList.add('active');
+                refreshBtn.classList.add('active');
+                generatedImageUrl = savedImage;
+                
+                if (savedPrompt) {
+                    currentPrompt = savedPrompt;
+                    promptDisplay.textContent = `提示词: "${savedPrompt}"`;
+                    promptDisplay.style.display = 'block';
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

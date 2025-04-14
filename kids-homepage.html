@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>哈哈魔法世界 - 儿童创意平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/responsive-base.css">
+    <style>
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "微软雅黑", Arial, sans-serif;
+            background-color: #F9F7FF;
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: var(--container-width);
+            margin: 0 auto;
+            padding: var(--spacing-md);
+        }
+        
+        /* 标题样式 */
+        .header {
+            text-align: center;
+            padding: var(--spacing-md) 0;
+            margin-bottom: var(--spacing-lg);
+            position: relative;
+        }
+        
+        .logo {
+            width: clamp(70px, 20vw, 100px);
+            height: clamp(70px, 20vw, 100px);
+            background: linear-gradient(135deg, #FF9D80, #FFD080);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--spacing-sm);
+            box-shadow: 0 8px 16px rgba(255, 157, 128, 0.3);
+        }
+        
+        .logo i {
+            font-size: var(--icon-size-lg);
+            color: white;
+        }
+        
+        .app-title {
+            font-size: var(--font-size-xl);
+            color: #FF6B6B;
+            margin: 0;
+            font-weight: bold;
+        }
+        
+        /* 收藏按钮 */
+        .collection-btn {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            width: var(--btn-size-sm);
+            height: var(--btn-size-sm);
+            background-color: #4CD964;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(76, 217, 100, 0.4);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid white;
+            text-decoration: none;
+        }
+        
+        .collection-btn i {
+            font-size: var(--icon-size-md);
+            color: white;
+        }
+        
+        .collection-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(76, 217, 100, 0.5);
+        }
+        
+        /* 主菜单网格 */
+        .main-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .menu-item {
+            background-color: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            padding: var(--spacing-lg);
+            position: relative;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-10px);
+        }
+        
+        .menu-item:nth-child(1) {
+            background-color: #FFE8E8;
+            border: 4px solid #FF6B6B;
+        }
+        
+        .menu-item:nth-child(2) {
+            background-color: #E8F8FF;
+            border: 4px solid #5CB8FF;
+        }
+        
+        .menu-item:nth-child(3) {
+            background-color: #FFF3E0;
+            border: 4px solid #FFAA4D;
+        }
+        
+        .menu-icon {
+            font-size: clamp(40px, 8vw, 64px);
+            margin-bottom: var(--spacing-md);
+            transition: transform 0.3s;
+        }
+        
+        .menu-item:hover .menu-icon {
+            transform: scale(1.2);
+        }
+        
+        .menu-item:nth-child(1) .menu-icon {
+            color: #FF6B6B;
+        }
+        
+        .menu-item:nth-child(2) .menu-icon {
+            color: #5CB8FF;
+        }
+        
+        .menu-item:nth-child(3) .menu-icon {
+            color: #FFAA4D;
+        }
+        
+        .menu-label {
+            font-size: var(--font-size-lg);
+            font-weight: bold;
+            text-align: center;
+            color: #333;
+        }
+        
+        /* 语音助手按钮 */
+        .voice-assistant {
+            position: fixed;
+            bottom: var(--spacing-xl);
+            right: var(--spacing-xl);
+            width: var(--btn-size-lg);
+            height: var(--btn-size-lg);
+            background: linear-gradient(145deg, #FF6B6B, #FF9D80);
+            border-radius: 50%;
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 1000;
+            border: 4px solid white;
+        }
+        
+        .voice-assistant:hover {
+            transform: scale(1.1);
+        }
+        
+        .voice-assistant i {
+            font-size: var(--icon-size-lg);
+            color: white;
+        }
+        
+        .voice-assistant.active {
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* 动画效果 */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(255, 107, 107, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
+            }
+        }
+        
+        @keyframes floating {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        
+        /* 卡通云朵背景装饰 */
+        .cloud {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+        }
+        
+        .cloud1 {
+            width: 200px;
+            height: 60px;
+            top: 100px;
+            left: -100px;
+            animation: floatCloud 20s linear infinite;
+            z-index: -1;
+        }
+        
+        .cloud2 {
+            width: 150px;
+            height: 45px;
+            top: 300px;
+            right: -50px;
+            animation: floatCloud 15s linear infinite;
+            animation-delay: 2s;
+            z-index: -1;
+        }
+        
+        @keyframes floatCloud {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(100vw + 200px));
+            }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: var(--breakpoint-xs)) {
+            .main-menu {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-md);
+            }
+            
+            .menu-item {
+                aspect-ratio: 16/9;
+                padding: var(--spacing-sm);
+            }
+            
+            .voice-assistant {
+                bottom: var(--spacing-md);
+                right: var(--spacing-md);
+            }
+        }
+        
+        @media (min-width: var(--breakpoint-xs)) and (max-width: var(--breakpoint-md)) {
+            .main-menu {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+        }
+        
+        @media (min-width: var(--breakpoint-lg)) {
+            .menu-item {
+                transition: all 0.3s ease;
+            }
+            
+            .menu-item:hover {
+                transform: translateY(-15px) scale(1.05);
+            }
+        }
+
+        /* 深色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #232333;
+                color: #f0f0f0;
+            }
+            
+            .menu-item {
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            }
+            
+            .menu-label {
+                color: #333;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 装饰性云朵 -->
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-star"></i>
+            </div>
+            <h1 class="app-title">创意魔法世界</h1>
+            
+            <!-- 收藏按钮 -->
+            <a href="knowledge-base.html" class="collection-btn" aria-label="知识库">
+                <i class="fas fa-star"></i>
+            </a>
+        </header>
+        
+        <div class="main-menu">
+            <!-- 图像创作 -->
+            <a href="kids-drawing.html" class="menu-item">
+                <div class="menu-icon">
+                    <i class="fas fa-paint-brush"></i>
+                </div>
+                <div class="menu-label">哈哈变图</div>
+            </a>
+            
+            <!-- 视频生成 -->
+            <a href="cogvideo-test.html" class="menu-item">
+                <div class="menu-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+                <div class="menu-label">哈哈动画</div>
+            </a>
+            
+            <!-- 故事绘本 -->
+            <a href="storybook-reader.html" class="menu-item">
+                <div class="menu-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="menu-label">哈哈故事</div>
+            </a>
+        </div>
+    </div>
+    
+    <!-- 语音助手按钮 -->
+    <div class="voice-assistant" id="voiceAssistant" aria-label="语音助手">
+        <i class="fas fa-microphone"></i>
+    </div>
+    
+    <!-- 引入语音识别相关JS -->
+    <script src="js/speechService.js"></script>
+    <script src="js/homeMic.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 添加菜单项的动画效果
+            const menuItems = document.querySelectorAll('.menu-item');
+            
+            // 检查是否支持动画（减少移动设备上的动画）
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            
+            if (!prefersReducedMotion) {
+                menuItems.forEach((item, index) => {
+                    item.style.animation = `floating 3s ease-in-out infinite ${index * 0.2}s`;
+                });
+            }
+            
+            // 检测设备类型并优化交互
+            const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            if (isTouchDevice) {
+                document.documentElement.classList.add('touch-device');
+            }
+        });
+    </script>
+</body>
+</html> 
