@@ -441,6 +441,7 @@
         <div class="feedback-modal">
             <i class="fas fa-volume-up feedback-icon" id="feedbackIcon"></i>
             <div class="feedback-text" id="feedbackText">我在听...</div>
+            <div class="feedback-hint" style="margin-top: 10px; font-size: 14px; color: #999;">点击喇叭图标停止录音</div>
         </div>
     </div>
     
@@ -466,6 +467,8 @@
             // 存储当前生成的图片URL和提示词
             let generatedImageUrl = '';
             let currentPrompt = '';
+            let recognitionTimeoutId = null;
+            let recognizedText = '';
             
             // 初始化语音识别服务
             if (!SpeechService.init()) {
@@ -475,24 +478,52 @@
                 }, 3000);
             }
             
+            // 停止语音识别并处理结果
+            function stopSpeechRecognition() {
+                // 清除超时计时器
+                if (recognitionTimeoutId) {
+                    clearTimeout(recognitionTimeoutId);
+                    recognitionTimeoutId = null;
+                }
+                
+                // 停止语音识别
+                SpeechService.stop();
+                
+                // 如果有识别结果，处理它
+                if (recognizedText) {
+                    showFeedback(`识别到: ${recognizedText}`, 'fa-check');
+                    
+                    // 存储提示词
+                    currentPrompt = recognizedText;
+                    
+                    // 延迟一会儿后开始生成图像
+                    setTimeout(() => {
+                        feedbackOverlay.style.display = 'none';
+                        startImageGeneration(recognizedText);
+                        // 重置识别的文本
+                        recognizedText = '';
+                    }, 1000);
+                } else {
+                    feedbackOverlay.style.display = 'none';
+                }
+            }
+            
             // 设置语音识别回调
             SpeechService.onStart(() => {
                 showFeedback('我在听...', 'fa-volume-up');
                 voiceBtn.classList.add('active');
+                
+                // 设置一分钟的超时
+                recognitionTimeoutId = setTimeout(() => {
+                    stopSpeechRecognition();
+                }, 60000); // 60秒 = 1分钟
             });
             
             SpeechService.onResult((text) => {
-                // 显示识别结果
-                showFeedback(`识别到: ${text}`, 'fa-check');
-                
-                // 存储提示词
-                currentPrompt = text;
-                
-                // 延迟一会儿后开始生成图像
-                setTimeout(() => {
-                    feedbackOverlay.style.display = 'none';
-                    startImageGeneration(text);
-                }, 1000);
+                // 存储识别结果，但不立即处理
+                recognizedText = text;
+                // 更新反馈文本，显示当前识别结果
+                feedbackText.textContent = `识别到: ${text}`;
             });
             
             SpeechService.onEnd(() => {
@@ -502,6 +533,12 @@
             SpeechService.onError((error) => {
                 console.error('语音识别错误:', error);
                 showFeedback('识别失败，请重试', 'fa-exclamation-circle');
+                
+                // 清除超时计时器
+                if (recognitionTimeoutId) {
+                    clearTimeout(recognitionTimeoutId);
+                    recognitionTimeoutId = null;
+                }
                 
                 setTimeout(() => {
                     feedbackOverlay.style.display = 'none';
@@ -551,7 +588,16 @@
             
             // 语音按钮点击事件
             voiceBtn.addEventListener('click', function() {
+                // 重置识别的文本
+                recognizedText = '';
                 SpeechService.start();
+            });
+            
+            // 反馈模态框点击事件 - 用于停止录音
+            feedbackOverlay.addEventListener('click', function() {
+                if (feedbackIcon.classList.contains('fa-volume-up')) {
+                    stopSpeechRecognition();
+                }
             });
             
             // 开始图片生成过程
